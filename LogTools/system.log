@@ -1,0 +1,5 @@
+03-01 12:12:46.399 12345 12345 I System.out: This is an informational log message.
+03-01 12:12:47.500 12345 12345 W System.err: This is a warning log message.
+03-01 12:12:48.600 12345 12345 E System.err: This is an error log message.
+03-01 12:12:49.700 12345 12345 D System.out: This is a debug log message.
+03-01 12:12:50.800 12345 12345 V System.out: This is a verbose log message.

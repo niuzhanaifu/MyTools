@@ -116,8 +116,8 @@ class LogProcessor:
 
 if __name__ == "__main__":
     # 配置参数
-    log_directory = "D:\项目资料\工作时学习资料\日志解析"  # 日志文件所在的目录
-    output_directory = "D:\项目资料\工作时学习资料\日志解析"  # 切片文件输出的目录
+    log_directory = "D:\xxxx"  # 日志文件所在的目录
+    output_directory = "D:\xxxx"  # 切片文件输出的目录
     start_time = "03-01 12:00:00.000"  # 开始时间
     end_time = "03-01 13:00:00.000"  # 结束时间
     #special_logs = [r"error", r"warning", r"critical"]  # 特定日志的正则表达式列表

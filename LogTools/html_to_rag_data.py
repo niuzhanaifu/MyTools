@@ -84,12 +84,8 @@ def save_rag_data_to_excel(rag_data, output_file_path):
 
 
 if __name__ == "__main__":
-    html_file = 'D:\项目资料\工作时学习资料\日志解析\RAG_mk_test.html'
-    output_file = 'D:\项目资料\工作时学习资料\日志解析\\ag_data.xlsx'
+    html_file = 'D:RAG_mk_test.html'
+    output_file = 'D:\ag_data.xlsx'
     rag_data = html_to_rag_data(html_file)
     if rag_data:
         save_rag_data_to_excel(rag_data, output_file)
-
-
-html_file = 'D:\项目资料\工作时学习资料\日志解析\RAG_mk_test.html'
-output_file = 'D:\项目资料\工作时学习资料\日志解析\\ag_data.xlsx'

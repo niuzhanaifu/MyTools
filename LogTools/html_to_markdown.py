@@ -18,6 +18,6 @@ def html_to_markdown(html_file_path, markdown_file_path):
         print(f"错误: 发生了一个未知错误: {e}")
 
 if __name__ == "__main__":
-    html_file = 'D:\项目资料\工作时学习资料\日志解析\RAG_mk_test.html'
-    markdown_file = 'D:\项目资料\工作时学习资料\日志解析\output1.md'
+    html_file = 'D:\RAG_mk_test.html'
+    markdown_file = 'D:\output1.md'
     html_to_markdown(html_file, markdown_file)

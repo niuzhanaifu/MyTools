@@ -1,6 +1,8 @@
 import os
 import re
 from datetime import datetime
+import LlmTools
+
 
 class LogProcessor:
     def __init__(self, log_directory, output_directory, start_time, end_time, special_logs, slice_size_limit=32*1024, token_limit=4096):
@@ -24,6 +26,41 @@ class LogProcessor:
         self.slice_file_count = 0
         self.slice_size = 0
         self.current_slice_file = os.path.join(self.output_directory, f"slice_{self.slice_file_count}.log")
+        self.history_slice_file = []
+        self.llm_client = LlmTools.LlmTools()
+        self.tools = [
+            # 工具1 获取当前时刻的时间
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_current_time",
+                    "description": "当你想知道现在的时间时非常有用。",
+                    # 因为获取当前时间无需输入参数，因此parameters为空字典
+                    "parameters": {}
+                }
+            },
+            # 工具2 获取指定城市的天气
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_current_weather",
+                    "description": "当你想查询指定城市的天气时非常有用。",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            # 查询天气时需要提供位置，因此参数设置为location
+                            "location": {
+                                "type": "string",
+                                "description": "城市或县区，比如北京市、杭州市、余杭区等。"
+                            }
+                        }
+                    },
+                    "required": [
+                        "location"
+                    ]
+                }
+            }
+        ]
 
     def match_files(self):
         """匹配目录中所有名字含有system.log的文件"""
@@ -60,6 +97,7 @@ class LogProcessor:
                 "log_level": log_level,
                 "tag": tag,
                 "content": log_content,
+                "text": line,
             }
         return None
 
@@ -83,23 +121,24 @@ class LogProcessor:
         with open(self.current_slice_file, "a") as f:
             f.write(log + "\n")
         self.slice_size += len(log.encode("utf-8"))
+        self.history_slice_file.append(self.current_slice_file)
         if self.slice_size >= self.slice_size_limit:
             self.slice_file_count += 1
             self.slice_size = 0
             self.current_slice_file = os.path.join(self.output_directory, f"slice_{self.slice_file_count}.log")
 
     def ask_language_model(self, log_str):
-        """向语言模型提问，并处理token过长的情况"""
-        # 这里假设有一个语言模型的API可以调用
-        # 例如：response = language_model_api.ask(log_str)
-        # 这里我们模拟一个简单的处理
-        if len(log_str) > self.token_limit:
-            return "Token limit exceeded"
-        return "Response from language model"
+        """向语言模型提问"""
+        # 这里有一个语言模型的API可以调用
+        result = self.llm_client.query_from_llm(log_str, self.tools, "qwen")
+        print(result)
+        return result
 
     def process_logs(self):
         """处理日志文件"""
         matched_files = self.match_files()
+        result = ""
+        message = "分析下面这段日志有无丢日志问题"
         for file in matched_files:
             with open(file, "r") as f:
                 for line in f:
@@ -108,16 +147,29 @@ class LogProcessor:
                         # 将日志内容保存到切片文件
                         self.save_to_slice_file(line.strip())
                         # 向语言模型提问
+                        # response = self.ask_language_model(log_entry["content"])
+                        # if response == "Token limit exceeded":
+                        #     # 处理token过长的情况
+                        #     # 这里可以将日志字符串切片后再提问
+                        #     pass
+        for file in self.history_slice_file:
+            with open(file, "r") as f:
+                for line in f:
+                    message = message + line
+                    if len(message) >= 16*1024:
                         response = self.ask_language_model(log_entry["content"])
-                        if response == "Token limit exceeded":
-                            # 处理token过长的情况
-                            # 这里可以将日志字符串切片后再提问
-                            pass
+                        result = result + response
+                        message = "分析下面这段日志有无丢日志问题"
+        if len(message) > len("分析下面这段日志有无丢日志问题"):
+            print(message)
+            response = self.ask_language_model(log_entry["content"])
+            result = result + response
+        return result
 
 if __name__ == "__main__":
     # 配置参数
-    log_directory = "D:\xxxx"  # 日志文件所在的目录
-    output_directory = "D:\xxxx"  # 切片文件输出的目录
+    log_directory = "D:\workspace\gitlab-tools\LogTools"  # 日志文件所在的目录
+    output_directory = "D:\workspace\gitlab-tools\LogTools"  # 切片文件输出的目录
     start_time = "03-01 12:00:00.000"  # 开始时间
     end_time = "03-01 13:00:00.000"  # 结束时间
     #special_logs = [r"error", r"warning", r"critical"]  # 特定日志的正则表达式列表

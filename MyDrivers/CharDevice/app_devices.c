@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <dirent.h>
-#include "test_devices.h"
+#include "my_device.h"
 
 #define BUFFER_SIZE 1024
 static my_test_devices_t data = {0};
